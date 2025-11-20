@@ -3,13 +3,16 @@ class MultiplicationGame {
     constructor() {
         this.score = 0;
         this.level = 1;
+        this.maxLevel = 7;
         this.correctCount = 0;
-        this.totalQuestions = 5;
-        this.timeLimit = 30;
+        this.totalQuestions = 10;
+        this.timeLimit = 90;
         this.timeLeft = this.timeLimit;
+        this.hasMadeMistake = false;
         this.timer = null;
         this.isPlaying = false;
         this.currentQuestion = null;
+        this.recentQuestions = []; // Store last 3 questions
         this.equippedItems = [];
         
         this.initializeGame();
@@ -69,6 +72,13 @@ class MultiplicationGame {
     startGame() {
         this.isPlaying = true;
         this.correctCount = 0;
+        this.hasMadeMistake = false;
+        
+        // Calculate time limit based on level: 90s -> 30s
+        // Level 1: 90, 2: 80, 3: 70, 4: 60, 5: 50, 6: 40, 7: 30
+        const levelIndex = Math.min(this.level, this.maxLevel) - 1;
+        this.timeLimit = 90 - (levelIndex * 10);
+        
         this.timeLeft = this.timeLimit;
         this.updateDisplay();
         
@@ -81,10 +91,22 @@ class MultiplicationGame {
 
     // 生成题目
     generateQuestion() {
-        const num1 = Math.floor(Math.random() * 4) + 2; // 2-5
-        const num2 = Math.floor(Math.random() * 4) + 2; // 2-5
-        const correctAnswer = num1 * num2;
+        let num1, num2, questionKey;
         
+        // Generate unique question not in recent history
+        do {
+            num1 = Math.floor(Math.random() * 4) + 2; // 2-5
+            num2 = Math.floor(Math.random() * 4) + 2; // 2-5
+            questionKey = `${Math.min(num1, num2)}x${Math.max(num1, num2)}`;
+        } while (this.recentQuestions.includes(questionKey));
+
+        // Update history
+        this.recentQuestions.push(questionKey);
+        if (this.recentQuestions.length > 3) {
+            this.recentQuestions.shift();
+        }
+
+        const correctAnswer = num1 * num2;
         this.currentQuestion = { num1, num2, correctAnswer };
         
         // 显示题目
@@ -99,15 +121,15 @@ class MultiplicationGame {
     generateOptions(correctAnswer) {
         const options = new Set([correctAnswer]);
         
+        // Valid products for 2-5 multiplication table
+        const validProducts = [4, 6, 8, 9, 10, 12, 15, 16, 20, 25];
+        
         while (options.size < 4) {
-            // 生成接近正确答案的错误选项
-            let wrongAnswer;
-            if (Math.random() > 0.5) {
-                // 加减1-3
-                wrongAnswer = correctAnswer + Math.floor(Math.random() * 3) + 1;
-            } else {
-                wrongAnswer = Math.max(2, correctAnswer - Math.floor(Math.random() * 3) - 1);
-            }
+            // Randomly select from valid products
+            const randomIndex = Math.floor(Math.random() * validProducts.length);
+            const wrongAnswer = validProducts[randomIndex];
+            
+            // Add if not already present (Set handles duplicates automatically)
             options.add(wrongAnswer);
         }
         
@@ -135,6 +157,7 @@ class MultiplicationGame {
 
     // 检查答案
     checkAnswer(selectedAnswer) {
+        console.log(`Checking answer: Selected ${selectedAnswer}, Correct ${this.currentQuestion.correctAnswer}`);
         const options = document.querySelectorAll('.option');
         const correctAnswer = this.currentQuestion.correctAnswer;
         
@@ -151,10 +174,18 @@ class MultiplicationGame {
 
         if (selectedAnswer === correctAnswer) {
             this.correctCount++;
+            console.log(`Answer Correct! Progress: ${this.correctCount}/${this.totalQuestions}`);
             this.showMessage('回答正确！👍', 'success');
-            this.addScore(10);
         } else {
+            console.log('Answer Wrong!');
+            this.hasMadeMistake = true;
             this.showMessage(`回答错误！正确答案是 ${correctAnswer}`, 'error');
+            
+            // 立即结束游戏
+            setTimeout(() => {
+                this.endGame(false);
+            }, 1500);
+            return;
         }
 
         this.updateDisplay();
@@ -167,7 +198,7 @@ class MultiplicationGame {
                 this.generateQuestion();
                 this.enableOptions();
             }
-        }, 1500);
+        }, 500);
     }
 
     // 启用选项按钮
@@ -202,15 +233,35 @@ class MultiplicationGame {
         clearInterval(this.timer);
         
         document.getElementById('startBtn').disabled = false;
-        document.getElementById('startBtn').textContent = '重新开始';
         
         if (isSuccess) {
-            const bonus = Math.max(1, Math.floor(this.timeLeft / 5)) * 10;
-            this.addScore(bonus);
-            this.showMessage(`关卡完成！获得 ${bonus} 积分奖励！`, 'success');
-            this.level++;
+            if (!this.hasMadeMistake) {
+                this.addScore(10);
+                this.showMessage(`完美通关！全部答对，获得 10 积分奖励！`, 'success');
+            } else {
+                this.showMessage(`关卡完成！可惜有错误，无法获得积分。`, 'info');
+            }
+            
+            if (this.level < this.maxLevel) {
+                this.level++;
+                document.getElementById('startBtn').textContent = '继续闯关';
+            } else {
+                this.showMessage('恭喜通关所有关卡！', 'success');
+                document.getElementById('startBtn').textContent = '恭喜通关';
+                // Reset level to 1 if they want to play again? Or keep at max?
+                // Let's reset to 1 for replayability after full completion
+                this.level = 1;
+                setTimeout(() => {
+                     document.getElementById('startBtn').textContent = '重新开始';
+                }, 2000);
+            }
         } else {
-            this.showMessage('时间到！游戏结束！', 'error');
+            document.getElementById('startBtn').textContent = '重新开始';
+            if (this.hasMadeMistake) {
+                this.showMessage('回答错误，挑战失败！请重新开始。', 'error');
+            } else {
+                this.showMessage('时间到！游戏结束！', 'error');
+            }
         }
         
         this.updateDisplay();
