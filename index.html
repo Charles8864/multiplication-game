@@ -9,19 +9,6 @@
     
     <!-- Favicon -->
     <link rel="icon" href="icon.svg" type="image/svg+xml">
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- 苹果设备支持 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="乘法挑战">
-    
-    <!-- 微软设备支持 -->
-    <meta name="msapplication-TileColor" content="#667eea">
-    <meta name="msapplication-config" content="browserconfig.xml">
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -109,53 +96,5 @@
 
     <script src="script.js"></script>
     
-    <!-- PWA Service Worker 注册 -->
-    <script>
-        // 注册Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(function(registration) {
-                        console.log('Service Worker 注册成功: ', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.log('Service Worker 注册失败: ', error);
-                    });
-            });
-        }
-
-        // 检测是否可安装
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // 阻止浏览器默认的安装提示
-            e.preventDefault();
-            // 保存事件以便后续使用
-            deferredPrompt = e;
-            console.log('应用可安装');
-            
-            // 可以在这里显示自定义的安装按钮
-            // showInstallPromotion();
-        });
-
-        // 安装按钮点击事件（可选）
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('用户同意安装');
-                    } else {
-                        console.log('用户拒绝安装');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        }
-
-        // 监听应用安装完成
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('应用已安装到主屏幕');
-        });
-    </script>
 </body>
 </html>
