@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乘法口诀小游戏</title>
+    <meta name="description" content="一个有趣的乘法口诀学习游戏">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- 苹果设备支持 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="乘法挑战">
+    
+    <!-- 微软设备支持 -->
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>乘法口诀大挑战</h1>
+            <div class="score-time">
+                <div class="score">积分: <span id="score">0</span></div>
+                <div class="time">时间: <span id="timer">30</span>秒</div>
+            </div>
+        </header>
+
+        <div class="game-area">
+            <div class="chicken-character">
+                <div class="chicken" id="chicken">
+                    <div class="chicken-body">🐥</div>
+                    <div class="chicken-accessories"></div>
+                </div>
+                <div class="chicken-name">小黄鸡</div>
+            </div>
+
+            <div class="question-area">
+                <div class="question" id="question">2 × 3 = ?</div>
+                <div class="options" id="options">
+                    <button class="option" data-value="6">6</button>
+                    <button class="option" data-value="4">4</button>
+                    <button class="option" data-value="8">8</button>
+                    <button class="option" data-value="5">5</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn" class="btn start">开始游戏</button>
+            <button id="dressUpBtn" class="btn dress-up">换装商店</button>
+        </div>
+
+        <div class="level-info">
+            <div class="level">关卡: <span id="level">1</span></div>
+            <div class="correct-count">正确: <span id="correctCount">0</span>/5</div>
+        </div>
+    </div>
+
+    <!-- 换装商店模态框 -->
+    <div id="dressUpModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>小鸡换装商店</h2>
+            <div class="shop-items">
+                <div class="shop-item" data-item="hat" data-cost="10">
+                    <div class="item-icon">🎩</div>
+                    <div class="item-info">
+                        <div class="item-name">时尚帽子</div>
+                        <div class="item-price">10积分</div>
+                    </div>
+                    <button class="buy-btn">购买</button>
+                </div>
+                <div class="shop-item" data-item="glasses" data-cost="15">
+                    <div class="item-icon">👓</div>
+                    <div class="item-info">
+                        <div class="item-name">酷炫眼镜</div>
+                        <div class="item-price">15积分</div>
+                    </div>
+                    <button class="buy-btn">购买</button>
+                </div>
+                <div class="shop-item" data-item="scarf" data-cost="20">
+                    <div class="item-icon">🧣</div>
+                    <div class="item-info">
+                        <div class="item-name">温暖围巾</div>
+                        <div class="item-price">20积分</div>
+                    </div>
+                    <button class="buy-btn">购买</button>
+                </div>
+                <div class="shop-item" data-item="shoes" data-cost="25">
+                    <div class="item-icon">👟</div>
+                    <div class="item-info">
+                        <div class="item-name">运动鞋</div>
+                        <div class="item-price">25积分</div>
+                    </div>
+                    <button class="buy-btn">购买</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    
+    <!-- PWA Service Worker 注册 -->
+    <script>
+        // 注册Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker 注册成功: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker 注册失败: ', error);
+                    });
+            });
+        }
+
+        // 检测是否可安装
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // 阻止浏览器默认的安装提示
+            e.preventDefault();
+            // 保存事件以便后续使用
+            deferredPrompt = e;
+            console.log('应用可安装');
+            
+            // 可以在这里显示自定义的安装按钮
+            // showInstallPromotion();
+        });
+
+        // 安装按钮点击事件（可选）
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('用户同意安装');
+                    } else {
+                        console.log('用户拒绝安装');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // 监听应用安装完成
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('应用已安装到主屏幕');
+        });
+    </script>
+</body>
+</html>

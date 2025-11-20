@@ -1,0 +1,19 @@
+{
+  "name": "乘法口诀大挑战",
+  "short_name": "乘法挑战",
+  "description": "一个有趣的乘法口诀学习游戏",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["education", "games"],
+  "lang": "zh-CN"
+}
