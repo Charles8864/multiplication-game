@@ -103,6 +103,11 @@ h1 {
     background: rgba(255, 255, 255, 0.2);
 }
 
+/* 测试模式下隐藏装备槽框 */
+.test-mode .slot-frame {
+    display: none;
+}
+
 .chicken-accessories {
     position: absolute;
     top: 0;

@@ -68,6 +68,11 @@ class MultiplicationGame {
     initializeGame() {
         this.bindEvents();
         this.updateDisplay();
+        
+        // 如果是测试模式，添加测试模式类到body
+        if (IS_TEST_MODE) {
+            document.body.classList.add('test-mode');
+        }
     }
 
     // 绑定事件
