@@ -287,8 +287,8 @@ class MultiplicationGame {
         
         if (isSuccess) {
             if (!this.hasMadeMistake) {
-                this.addScore(10);
-                this.showMessage(`完美通关！全部答对，获得 10 积分奖励！`, 'success');
+                this.addScore(80);
+                this.showMessage(`完美通关！全部答对，获得 80 积分奖励！`, 'success');
             } else {
                 this.showMessage(`关卡完成！可惜有错误，无法获得积分。`, 'info');
             }
