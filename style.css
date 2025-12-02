@@ -96,16 +96,12 @@ h1 {
     transition: all 0.3s ease;
     left: 50%;
     transform: translateX(-50%);
+    display: none; /* 隐藏装备槽框 */
 }
 
 .slot-frame:hover {
     border-color: rgba(102, 126, 234, 0.8);
     background: rgba(255, 255, 255, 0.2);
-}
-
-/* 测试模式下隐藏装备槽框 */
-.test-mode .slot-frame {
-    display: none;
 }
 
 .chicken-accessories {
