@@ -1,7 +1,52 @@
+// 游戏物品数据配置
+const ITEM_DATA = {
+    // 帽子类 (head)
+    'hat_top': { name: '绅士礼帽', cost: 10, slot: 'head', image: 'UI/accessories/hats/hat_top.png', category: 'hat' },
+    'hat_crown': { name: '黄金皇冠', cost: 50, slot: 'head', image: 'UI/accessories/hats/hat_crown.png', category: 'hat' },
+    'hat_cap': { name: '棒球帽', cost: 15, slot: 'head', image: 'UI/accessories/hats/hat_cap.png', category: 'hat' },
+
+    // 衣服类 (body)
+    'clothes_shirt': { name: 'T恤', cost: 20, slot: 'body', image: 'UI/accessories/clothes/clothes_shirt.png', category: 'clothes' },
+    'clothes_dress': { name: '连衣裙', cost: 30, slot: 'body', image: 'UI/accessories/clothes/clothes_dress.png', category: 'clothes' },
+    'clothes_coat': { name: '外套', cost: 40, slot: 'body', image: 'UI/accessories/clothes/clothes_coat.png', category: 'clothes' },
+
+    // 眼镜类 (eyes)
+    'glasses_cool': { name: '酷炫眼镜', cost: 15, slot: 'eyes', image: 'UI/accessories/glasses/glasses_cool.png', category: 'glasses' },
+    'glasses_sun': { name: '墨镜', cost: 25, slot: 'eyes', image: 'UI/accessories/glasses/glasses_sun.png', category: 'glasses' },
+    'glasses_red': { name: '红框眼镜', cost: 20, slot: 'eyes', image: 'UI/accessories/glasses/glasses_red.png', category: 'glasses' },
+
+    // 挂件类 (neck) - 主要是围巾、项链等
+    'acc_scarf': { name: '温暖围巾', cost: 20, slot: 'neck', image: 'UI/accessories/accessories/acc_scarf.png', category: 'accessory' },
+    'acc_bow': { name: '蝴蝶结', cost: 30, slot: 'neck', image: 'UI/accessories/accessories/acc_bow.png', category: 'accessory' },
+    'acc_necklace': { name: '珍珠项链', cost: 45, slot: 'neck', image: 'UI/accessories/accessories/acc_necklace.png', category: 'accessory' },
+
+    // 武器类 (hand)
+    'weapon_sword': { name: '宝剑', cost: 35, slot: 'hand', image: 'UI/accessories/weapons/weapon_sword.png', category: 'weapon' },
+    'weapon_wand': { name: '魔杖', cost: 45, slot: 'hand', image: 'UI/accessories/weapons/weapon_wand.png', category: 'weapon' },
+    'weapon_shield': { name: '盾牌', cost: 30, slot: 'hand', image: 'UI/accessories/weapons/weapon_shield.png', category: 'weapon' },
+
+    // 鞋子类 (feet)
+    'shoes_sneakers': { name: '运动鞋', cost: 25, slot: 'feet', image: 'UI/accessories/shoes/shoes_sneakers.png', category: 'shoes' },
+    'shoes_boots': { name: '长筒靴', cost: 35, slot: 'feet', image: 'UI/accessories/shoes/shoes_boots.png', category: 'shoes' },
+    'shoes_heels': { name: '高跟鞋', cost: 30, slot: 'feet', image: 'UI/accessories/shoes/shoes_heels.png', category: 'shoes' }
+};
+
+const CATEGORIES = {
+    'hat': '帽子',
+    'glasses': '眼镜',
+    'clothes': '衣服',
+    'accessory': '挂件',
+    'weapon': '武器',
+    'shoes': '鞋子'
+};
+
+// 测试模式开关
+const IS_TEST_MODE = false; // 设置为 true 开启测试模式（初始积分 10000），false 关闭
+
 // 游戏状态管理
 class MultiplicationGame {
     constructor() {
-        this.score = 0;
+        this.score = IS_TEST_MODE ? 10000 : 0;
         this.level = 1;
         this.maxLevel = 7;
         this.correctCount = 0;
@@ -13,7 +58,8 @@ class MultiplicationGame {
         this.isPlaying = false;
         this.currentQuestion = null;
         this.recentQuestions = []; // Store last 3 questions
-        this.equippedItems = [];
+        this.ownedItems = []; // 已拥有的物品
+        this.equippedItems = {}; // 当前装备的物品 { slot: itemKey }
         
         this.initializeGame();
     }
@@ -57,13 +103,16 @@ class MultiplicationGame {
             }
         });
 
-        // 购买按钮
+        // 购买/装备按钮
+        // 注意：这里使用事件委托或者在生成列表时绑定，目前HTML是静态的，但后续可能会动态生成
+        // 为了支持动态添加的物品，建议修改为动态绑定，或者在openDressUpShop时重新绑定
+        // 这里暂时保持原样，但逻辑修改为 handleShopAction
         document.querySelectorAll('.buy-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const shopItem = e.target.closest('.shop-item');
                 const item = shopItem.dataset.item;
                 const cost = parseInt(shopItem.dataset.cost);
-                this.buyItem(item, cost, shopItem);
+                this.handleShopAction(item, cost);
             });
         });
     }
@@ -95,8 +144,8 @@ class MultiplicationGame {
         
         // Generate unique question not in recent history
         do {
-            num1 = Math.floor(Math.random() * 4) + 2; // 2-5
-            num2 = Math.floor(Math.random() * 4) + 2; // 2-5
+            num1 = Math.floor(Math.random() * 9) + 1; // 1-9
+            num2 = Math.floor(Math.random() * 9) + 1; // 1-9
             questionKey = `${Math.min(num1, num2)}x${Math.max(num1, num2)}`;
         } while (this.recentQuestions.includes(questionKey));
 
@@ -121,8 +170,10 @@ class MultiplicationGame {
     generateOptions(correctAnswer) {
         const options = new Set([correctAnswer]);
         
-        // Valid products for 2-5 multiplication table
-        const validProducts = [4, 6, 8, 9, 10, 12, 15, 16, 20, 25];
+        // Valid products for 1-9 multiplication table
+        const validProducts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15, 16, 18, 20,
+                              21, 24, 25, 27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49,
+                              54, 56, 63, 64, 72, 81];
         
         while (options.size < 4) {
             // Randomly select from valid products
@@ -305,7 +356,62 @@ class MultiplicationGame {
     // 打开换装商店
     openDressUpShop() {
         document.getElementById('dressUpModal').style.display = 'block';
+        this.renderShopItems(); // 动态渲染商店物品
         this.updateShopButtons();
+    }
+
+    // 渲染商店物品
+    renderShopItems() {
+        const shopContainer = document.querySelector('.shop-items');
+        shopContainer.innerHTML = ''; // 清空现有内容
+
+        // 按分类分组
+        const itemsByCategory = {};
+        Object.entries(ITEM_DATA).forEach(([key, item]) => {
+            if (!itemsByCategory[item.category]) {
+                itemsByCategory[item.category] = [];
+            }
+            itemsByCategory[item.category].push({ key, ...item });
+        });
+
+        // 遍历分类渲染
+        Object.entries(CATEGORIES).forEach(([catKey, catName]) => {
+            // 创建分类标题
+            const categoryTitle = document.createElement('h3');
+            categoryTitle.className = 'shop-category-title';
+            categoryTitle.textContent = catName;
+            shopContainer.appendChild(categoryTitle);
+
+            // 创建该分类下的物品容器
+            const categoryContainer = document.createElement('div');
+            categoryContainer.className = 'shop-category-items';
+
+            const items = itemsByCategory[catKey] || [];
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'shop-item';
+                itemDiv.dataset.item = item.key;
+                itemDiv.dataset.cost = item.cost;
+
+                itemDiv.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="item-icon">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-price">${item.cost}积分</div>
+                    </div>
+                    <button class="buy-btn">购买</button>
+                `;
+                
+                // 绑定点击事件
+                itemDiv.querySelector('.buy-btn').addEventListener('click', () => {
+                    this.handleShopAction(item.key, item.cost);
+                });
+
+                categoryContainer.appendChild(itemDiv);
+            });
+
+            shopContainer.appendChild(categoryContainer);
+        });
     }
 
     // 关闭换装商店
@@ -315,45 +421,89 @@ class MultiplicationGame {
 
     // 更新商店按钮状态
     updateShopButtons() {
-        document.querySelectorAll('.shop-item').forEach(item => {
-            const itemType = item.dataset.item;
-            const cost = parseInt(item.dataset.cost);
-            const buyBtn = item.querySelector('.buy-btn');
+        document.querySelectorAll('.shop-item').forEach(itemElem => {
+            const itemKey = itemElem.dataset.item;
+            const cost = parseInt(itemElem.dataset.cost);
+            const buyBtn = itemElem.querySelector('.buy-btn');
+            const itemData = ITEM_DATA[itemKey];
             
-            if (this.equippedItems.includes(itemType)) {
-                buyBtn.textContent = '已装备';
-                buyBtn.disabled = true;
-            } else if (this.score < cost) {
-                buyBtn.textContent = '积分不足';
-                buyBtn.disabled = true;
+            if (!this.ownedItems.includes(itemKey)) {
+                // 尚未购买
+                buyBtn.textContent = `购买 (${cost})`;
+                buyBtn.classList.remove('btn-equip', 'btn-unequip');
+                if (this.score < cost) {
+                    buyBtn.disabled = true;
+                    buyBtn.textContent = '积分不足';
+                } else {
+                    buyBtn.disabled = false;
+                }
             } else {
-                buyBtn.textContent = '购买';
+                // 已购买
                 buyBtn.disabled = false;
+                const isEquipped = this.equippedItems[itemData.slot] === itemKey;
+                
+                if (isEquipped) {
+                    buyBtn.textContent = '脱下';
+                    buyBtn.classList.add('btn-unequip');
+                    buyBtn.classList.remove('btn-equip');
+                } else {
+                    buyBtn.textContent = '穿戴';
+                    buyBtn.classList.add('btn-equip');
+                    buyBtn.classList.remove('btn-unequip');
+                }
             }
         });
     }
 
-    // 购买物品
-    buyItem(item, cost, shopItem) {
-        if (this.score >= cost && !this.equippedItems.includes(item)) {
-            this.score -= cost;
-            this.equippedItems.push(item);
+    // 处理商店操作（购买/穿戴/脱下）
+    handleShopAction(itemKey, cost) {
+        const itemData = ITEM_DATA[itemKey];
+        if (!itemData) return;
+
+        if (!this.ownedItems.includes(itemKey)) {
+            // 购买逻辑
+            if (this.score >= cost) {
+                this.score -= cost;
+                this.ownedItems.push(itemKey);
+                this.updateDisplay();
+                this.showMessage(`成功购买 ${itemData.name}！`, 'success');
+                // 购买后自动穿戴
+                this.equipItem(itemKey);
+            }
+        } else {
+            // 穿戴/脱下逻辑
+            const isEquipped = this.equippedItems[itemData.slot] === itemKey;
+            if (isEquipped) {
+                this.unequipItem(itemData.slot);
+            } else {
+                this.equipItem(itemKey);
+            }
+        }
+        this.updateShopButtons();
+    }
+
+    // 穿戴物品
+    equipItem(itemKey) {
+        const itemData = ITEM_DATA[itemKey];
+        if (!itemData) return;
+
+        this.equippedItems[itemData.slot] = itemKey;
+        this.updateChickenAppearance();
+        this.updateShopButtons();
+    }
+
+    // 脱下物品
+    unequipItem(slot) {
+        if (this.equippedItems[slot]) {
+            delete this.equippedItems[slot];
             this.updateChickenAppearance();
-            this.updateDisplay();
             this.updateShopButtons();
-            this.showMessage(`成功购买 ${this.getItemName(item)}！`, 'success');
         }
     }
 
     // 获取物品名称
     getItemName(item) {
-        const names = {
-            'hat': '时尚帽子',
-            'glasses': '酷炫眼镜',
-            'scarf': '温暖围巾',
-            'shoes': '运动鞋'
-        };
-        return names[item] || item;
+        return ITEM_DATA[item] ? ITEM_DATA[item].name : item;
     }
 
     // 更新小鸡外观
@@ -361,23 +511,41 @@ class MultiplicationGame {
         const accessoriesDiv = document.querySelector('.chicken-accessories');
         accessoriesDiv.innerHTML = '';
         
-        this.equippedItems.forEach(item => {
-            const accessory = document.createElement('div');
-            accessory.className = `accessory ${item}`;
-            accessory.textContent = this.getAccessoryEmoji(item);
-            accessoriesDiv.appendChild(accessory);
+        Object.entries(this.equippedItems).forEach(([slot, itemKey]) => {
+            if (itemKey) {
+                const itemData = ITEM_DATA[itemKey];
+                const accessory = document.createElement('div');
+                accessory.className = `accessory slot-${slot} item-${itemKey}`;
+                
+                // 特殊处理脚部物品（鞋子），需要显示两只
+                if (slot === 'feet') {
+                    const leftShoe = document.createElement('img');
+                    leftShoe.className = 'shoe-left';
+                    leftShoe.src = itemData.image;
+                    leftShoe.alt = itemData.name;
+                    
+                    const rightShoe = document.createElement('img');
+                    rightShoe.className = 'shoe-right';
+                    rightShoe.src = itemData.image;
+                    rightShoe.alt = itemData.name;
+                    
+                    accessory.appendChild(leftShoe);
+                    accessory.appendChild(rightShoe);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = itemData.image;
+                    img.alt = itemData.name;
+                    accessory.appendChild(img);
+                }
+                
+                accessoriesDiv.appendChild(accessory);
+            }
         });
     }
 
-    // 获取配件表情
-    getAccessoryEmoji(item) {
-        const emojis = {
-            'hat': '🎩',
-            'glasses': '👓',
-            'scarf': '🧣',
-            'shoes': '👟'
-        };
-        return emojis[item] || '✨';
+    // 获取配件图片路径
+    getAccessoryImage(item) {
+        return ITEM_DATA[item] ? ITEM_DATA[item].image : '';
     }
 
     // 更新显示

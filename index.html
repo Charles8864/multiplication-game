@@ -24,7 +24,16 @@
         <div class="game-area">
             <div class="chicken-character">
                 <div class="chicken" id="chicken">
-                    <div class="chicken-body">🐥</div>
+                    <img src="UI/chicken.png" alt="小黄鸡" class="chicken-body">
+                    <!-- 装备槽位框架 -->
+                    <div class="equipment-slots">
+                        <div class="slot-frame slot-frame-head" title="头部装备"></div>
+                        <div class="slot-frame slot-frame-eyes" title="眼部装备"></div>
+                        <div class="slot-frame slot-frame-neck" title="颈部装备"></div>
+                        <div class="slot-frame slot-frame-body" title="身体装备"></div>
+                        <div class="slot-frame slot-frame-hand" title="手部装备"></div>
+                        <div class="slot-frame slot-frame-feet" title="脚部装备"></div>
+                    </div>
                     <div class="chicken-accessories"></div>
                 </div>
                 <div class="chicken-name">小黄鸡</div>
@@ -58,38 +67,7 @@
             <span class="close">&times;</span>
             <h2>小鸡换装商店</h2>
             <div class="shop-items">
-                <div class="shop-item" data-item="hat" data-cost="10">
-                    <div class="item-icon">🎩</div>
-                    <div class="item-info">
-                        <div class="item-name">时尚帽子</div>
-                        <div class="item-price">10积分</div>
-                    </div>
-                    <button class="buy-btn">购买</button>
-                </div>
-                <div class="shop-item" data-item="glasses" data-cost="15">
-                    <div class="item-icon">👓</div>
-                    <div class="item-info">
-                        <div class="item-name">酷炫眼镜</div>
-                        <div class="item-price">15积分</div>
-                    </div>
-                    <button class="buy-btn">购买</button>
-                </div>
-                <div class="shop-item" data-item="scarf" data-cost="20">
-                    <div class="item-icon">🧣</div>
-                    <div class="item-info">
-                        <div class="item-name">温暖围巾</div>
-                        <div class="item-price">20积分</div>
-                    </div>
-                    <button class="buy-btn">购买</button>
-                </div>
-                <div class="shop-item" data-item="shoes" data-cost="25">
-                    <div class="item-icon">👟</div>
-                    <div class="item-info">
-                        <div class="item-name">运动鞋</div>
-                        <div class="item-price">25积分</div>
-                    </div>
-                    <button class="buy-btn">购买</button>
-                </div>
+                <!-- 商店物品将通过 JavaScript 动态生成 -->
             </div>
         </div>
     </div>

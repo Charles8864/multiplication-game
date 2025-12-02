@@ -64,13 +64,43 @@ h1 {
 }
 
 .chicken {
-    font-size: 4rem;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     position: relative;
+    width: 200px; /* 设置固定宽度 */
+    height: 200px; /* 设置固定高度 */
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
 }
 
 .chicken-body {
-    font-size: 4rem;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 保持图片比例 */
+}
+
+.equipment-slots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.slot-frame {
+    position: absolute;
+    border: 2px dashed rgba(102, 126, 234, 0.4);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.slot-frame:hover {
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .chicken-accessories {
@@ -79,11 +109,146 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
+    pointer-events: none; /* 允许点击穿透 */
+}
+
+.accessory {
+    position: absolute;
+    /* 默认居中，具体位置由 slot 类控制 */
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
 }
+
+.accessory img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 头部装备槽框 */
+.slot-frame-head {
+    top: -20px;
+    width: 80px;
+    height: 80px;
+    z-index: 9;
+}
+
+/* 头部物品位置 (帽子, 皇冠) */
+.slot-head {
+    top: -10px;
+    left: 50%;
+    z-index: 10;
+    width: 80px;
+    height: 80px;
+}
+
+/* 眼部装备槽框 */
+.slot-frame-eyes {
+    top: 65px;
+    width: 110px;
+    height: 40px;
+    z-index: 19;
+}
+
+/* 眼部物品位置 (眼镜, 墨镜) */
+.slot-eyes {
+    top: 26px;
+    left: 50%;
+    z-index: 20;
+    width: 110px;
+    height: 110px;
+}
+
+/* 颈部装备槽框 */
+.slot-frame-neck {
+    top: 115px;
+    width: 70px;
+    height: 50px;
+    z-index: 14;
+}
+
+/* 颈部物品位置 (围巾, 蝴蝶结) */
+.slot-neck {
+    top: 100px;
+    left: 50%;
+    z-index: 15;
+    width: 70px;
+    height: 50px;
+}
+
+/* 脚部装备槽框 */
+.slot-frame-feet {
+    bottom: 15px;
+    width: 120px;
+    height: 40px;
+    z-index: 4;
+}
+
+/* 脚部物品位置 (鞋子) */
+.slot-feet {
+    bottom: 15px;
+    left: 50%;
+    z-index: 5;
+    width: 240px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    gap: 0px;
+}
+
+.slot-feet img {
+    width: 100px;
+    height: 80px;
+}
+
+/* 身体装备槽框 */
+.slot-frame-body {
+    top: 100px;
+    width: 110px;
+    height: 110px;
+    z-index: 7;
+}
+
+/* 衣服位置 (body) */
+.slot-body {
+    top: 75px;
+    left: 50%;
+    z-index: 8;
+    width: 128px;
+    height: 128px;
+}
+
+/* 手部装备槽框 */
+.slot-frame-hand {
+    top: 120px;
+    left: 85%;
+    width: 50px;
+    height: 50px;
+    z-index: 11;
+    transform: translateX(-50%) rotate(15deg);
+}
+
+/* 武器位置 (hand) */
+.slot-hand {
+    top: 120px;
+    left: 85%;
+    z-index: 12;
+    transform: translateX(-50%) rotate(15deg);
+    width: 50px;
+    height: 50px;
+}
+
+.shoe-left {
+    transform: scaleX(-1); /* 左脚鞋子：仅水平翻转，保持水平 */
+}
+
+.shoe-right {
+    transform: none; /* 右脚鞋子：保持原样，水平显示 */
+}
+
 
 .chicken-name {
     font-size: 1.2rem;
@@ -211,15 +376,35 @@ h1 {
 }
 
 .modal-content {
-    background-color: #fefefe;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
     margin: 5% auto;
-    padding: 20px;
-    border-radius: 20px;
+    padding: 25px;
+    border-radius: 25px;
     width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
+    max-width: 600px; /* 稍微加宽 */
+    max-height: 85vh;
     overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* 自定义滚动条 */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 .close {
@@ -237,59 +422,139 @@ h1 {
 .modal h2 {
     text-align: center;
     color: #ff6b6b;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 /* 商店物品样式 */
 .shop-items {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.shop-category-title {
+    color: #667eea;
+    font-size: 1.4rem;
+    border-bottom: 3px solid #e9ecef;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.shop-category-title::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: #667eea;
+    border-radius: 3px;
+}
+
+.shop-category-items {
     display: grid;
     gap: 15px;
+    /* 响应式网格布局，卡片更紧凑 */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
 
 .shop-item {
     display: flex;
+    flex-direction: column; /* 改为垂直布局 */
     align-items: center;
-    background: #f8f9fa;
+    background: white;
     padding: 15px;
-    border-radius: 10px;
-    gap: 15px;
+    border-radius: 15px;
+    gap: 10px;
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.shop-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    border-color: #667eea;
 }
 
 .item-icon {
-    font-size: 2.5rem;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 5px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
+
 .item-info {
-    flex: 1;
+    text-align: center;
+    width: 100%;
 }
 
 .item-name {
     font-weight: bold;
     margin-bottom: 5px;
+    font-size: 1.1rem;
+    color: #333;
 }
 
 .item-price {
-    color: #28a745;
+    color: #ffc107;
     font-weight: bold;
+    font-size: 1rem;
+    background: #fff8e1;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
 }
 
 .buy-btn {
-    padding: 8px 15px;
-    background: #007bff;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(145deg, #007bff, #0056b3);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,123,255,0.2);
 }
 
 .buy-btn:hover {
-    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,123,255,0.3);
+}
+
+.buy-btn:active {
+    transform: translateY(0);
 }
 
 .buy-btn:disabled {
-    background: #6c757d;
+    background: #e9ecef;
+    color: #adb5bd;
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.btn-equip {
+    background: #28a745;
+}
+
+.btn-equip:hover {
+    background: #218838;
+}
+
+.btn-unequip {
+    background: #dc3545;
+}
+
+.btn-unequip:hover {
+    background: #c82333;
 }
 
 /* 响应式设计 */
