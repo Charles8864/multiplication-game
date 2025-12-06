@@ -48,7 +48,7 @@ class MultiplicationGame {
     constructor() {
         this.score = IS_TEST_MODE ? 10000 : 0;
         this.level = 1;
-        this.maxLevel = 7;
+        this.maxLevel = 9;
         this.correctCount = 0;
         this.totalQuestions = 10;
         this.timeLimit = 90;
@@ -60,14 +60,17 @@ class MultiplicationGame {
         this.recentQuestions = []; // Store last 3 questions
         this.ownedItems = []; // 已拥有的物品
         this.equippedItems = {}; // 当前装备的物品 { slot: itemKey }
-        
+        this.completedAllLevels = false; // 是否通关所有关卡
+
         this.initializeGame();
     }
 
     // 初始化游戏
     initializeGame() {
+        this.loadGameData();
         this.bindEvents();
         this.updateDisplay();
+        this.updateChickenAppearance(); // 加载装备外观
     }
 
     // 绑定事件
@@ -119,21 +122,29 @@ class MultiplicationGame {
 
     // 开始游戏
     startGame() {
+        // 如果通关后重新开始，重置积分和关卡
+        if (this.completedAllLevels) {
+            this.score = 0;
+            this.level = 1;
+            this.completedAllLevels = false;
+            this.saveGameData();
+        }
+
         this.isPlaying = true;
         this.correctCount = 0;
         this.hasMadeMistake = false;
-        
+
         // Calculate time limit based on level: 90s -> 30s
-        // Level 1: 90, 2: 80, 3: 70, 4: 60, 5: 50, 6: 40, 7: 30
+        // Level 1: 90, 2: 80, 3: 70, 4: 60, 5: 50, 6: 40, 7: 30, 8: 20, 9: 10
         const levelIndex = Math.min(this.level, this.maxLevel) - 1;
         this.timeLimit = 90 - (levelIndex * 10);
-        
+
         this.timeLeft = this.timeLimit;
         this.updateDisplay();
-        
+
         document.getElementById('startBtn').disabled = true;
         document.getElementById('startBtn').textContent = '游戏中...';
-        
+
         this.generateQuestion();
         this.startTimer();
     }
@@ -297,6 +308,7 @@ class MultiplicationGame {
                 this.level++;
                 document.getElementById('startBtn').textContent = '继续闯关';
             } else {
+                this.completedAllLevels = true;
                 this.showMessage('恭喜通关所有关卡！', 'success');
                 document.getElementById('startBtn').textContent = '恭喜通关';
                 // Reset level to 1 if they want to play again? Or keep at max?
@@ -306,6 +318,7 @@ class MultiplicationGame {
                      document.getElementById('startBtn').textContent = '重新开始';
                 }, 2000);
             }
+            this.saveGameData();
         } else {
             document.getElementById('startBtn').textContent = '重新开始';
             if (this.hasMadeMistake) {
@@ -322,7 +335,8 @@ class MultiplicationGame {
     addScore(points) {
         this.score += points;
         document.getElementById('score').textContent = this.score;
-        
+        this.saveGameData();
+
         // 积分动画效果
         const scoreElement = document.getElementById('score');
         scoreElement.style.transform = 'scale(1.2)';
@@ -469,6 +483,7 @@ class MultiplicationGame {
                 this.showMessage(`成功购买 ${itemData.name}！`, 'success');
                 // 购买后自动穿戴
                 this.equipItem(itemKey);
+                this.saveGameData();
             }
         } else {
             // 穿戴/脱下逻辑
@@ -478,6 +493,7 @@ class MultiplicationGame {
             } else {
                 this.equipItem(itemKey);
             }
+            this.saveGameData();
         }
         this.updateShopButtons();
     }
@@ -554,11 +570,44 @@ class MultiplicationGame {
         document.getElementById('level').textContent = this.level;
         document.getElementById('correctCount').textContent = this.correctCount;
         document.getElementById('timer').textContent = this.timeLeft;
-        
+
         // 重置计时器颜色
         if (this.timeLeft > 10) {
             document.getElementById('timer').style.color = '';
             document.getElementById('timer').style.fontWeight = '';
+        }
+    }
+
+    // 加载游戏数据
+    loadGameData() {
+        try {
+            const data = localStorage.getItem('multiplicationGameData');
+            if (data) {
+                const parsed = JSON.parse(data);
+                this.score = parsed.score || 0;
+                this.level = parsed.level || 1;
+                this.ownedItems = parsed.ownedItems || [];
+                this.equippedItems = parsed.equippedItems || {};
+                this.completedAllLevels = parsed.completedAllLevels || false;
+            }
+        } catch (error) {
+            console.error('Failed to load game data:', error);
+        }
+    }
+
+    // 保存游戏数据
+    saveGameData() {
+        try {
+            const data = {
+                score: this.score,
+                level: this.level,
+                ownedItems: this.ownedItems,
+                equippedItems: this.equippedItems,
+                completedAllLevels: this.completedAllLevels
+            };
+            localStorage.setItem('multiplicationGameData', JSON.stringify(data));
+        } catch (error) {
+            console.error('Failed to save game data:', error);
         }
     }
 }
